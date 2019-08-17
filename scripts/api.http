@@ -1,5 +1,5 @@
-@api = https://localhost:5001
-@bookId = 29301472-d042-4dc5-bd4f-1b37a469bd18
+@api = https://localhost:5031
+@bookId = d9d45ccc-df42-46bf-9f73-b61be1242dfb
 
 ### Get book
 GET {{api}}/api/books/{{bookId}}

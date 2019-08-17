@@ -1,4 +1,5 @@
 ﻿using Akka.Actor;
+using Bookstore.Contracts;
 using Bookstore.Dto;
 using Bookstore.Messages;
 using System;
@@ -9,11 +10,13 @@ namespace Bookstore.Domain
 {
     public class BooksManagerActor : ReceiveActor
     {
-        private readonly Dictionary<Guid, Book> _books = new Dictionary<Guid, Book>();
+       
+        private IBookstoreStore _bookstoreStore;
 
-        public BooksManagerActor()
+        public BooksManagerActor(IBookstoreStore bookstoreStore)
         {
-            Receive<CreateBook>(command =>
+            _bookstoreStore = bookstoreStore;
+            ReceiveAsync<CreateBook>(async command =>
             {
                 var newBook = new Book
                 {
@@ -24,19 +27,23 @@ namespace Bookstore.Domain
                     InventoryAmount = command.InventoryAmount,
                 };
 
-                _books.Add(newBook.Id, newBook);
+                await _bookstoreStore.CreateBookAsync(newBook);
             });
 
-            Receive<GetBookById>(query =>
+            ReceiveAsync<GetBookById>(async query =>  
             {
-                if (_books.TryGetValue(query.Id, out var book))
-                    Sender.Tell(GetBookDto(book));
+                var bookDto = await _bookstoreStore.GetBookAsync(query.Id);
+
+                if (bookDto != null)
+                    Sender.Tell(bookDto);
                 else
                     Sender.Tell(BookNotFound.Instance);
             });
+            ReceiveAsync<GetBooks>(async query => {
+                var books = await _bookstoreStore.GetBooksAsync();
+                Sender.Tell(books);
+            });
 
-            Receive<GetBooks>(query =>
-                Sender.Tell(_books.Select(x => GetBookDto(x.Value)).ToList()));
         }
 
         private static BookDto GetBookDto(Book book) => new BookDto

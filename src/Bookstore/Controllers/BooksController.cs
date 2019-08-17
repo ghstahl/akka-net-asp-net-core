@@ -1,4 +1,5 @@
 ﻿using Akka.Actor;
+using Bookstore.Domain;
 using Bookstore.Dto;
 using Bookstore.Messages;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ namespace Bookstore.Controllers
     {
         private readonly IActorRef _booksManagerActor;
 
-        public BooksController(BooksManagerActorProvider booksManagerActorProvider)
+        public BooksController(ActorProvider<BooksManagerActor> booksManagerActorProvider)
         {
             _booksManagerActor = booksManagerActorProvider();
         }
