@@ -1,26 +1,31 @@
 ﻿using Akka.Actor;
 using Bookstore;
 using Bookstore.Domain;
+using Bookstore.Extensions;
 
 namespace BookstoreConsole
 {
     public class ConsoleApplication
     {
-        private readonly IActorRef _booksManagerActor;
-        private readonly ITestService _testService;
+        private readonly ActorSystem _system;
+        private readonly IActorFactory _actorFactory;
+        private readonly IActorRef _consoleReaderActor;
         public ConsoleApplication(
-            ActorProvider<BooksManagerActor> booksManagerActorProvider,
-            ITestService testService)
+            ActorSystem system,
+            IActorFactory actorFactory)
         {
-            _booksManagerActor = booksManagerActorProvider();
-            _testService = testService;
+            _system = system;
+            _actorFactory = actorFactory;
+            _consoleReaderActor = _actorFactory.CreateActor<ConsoleReaderActor>("ConsoleReaderActor");
         }
 
         // Application starting point
         public void Run()
         {
-            
-           _testService.DoSomethingUseful();
+            // tell console reader to begin
+            _consoleReaderActor.Tell("start");
+            // blocks the main thread from exiting until the actor system is shut down
+            _system.WhenTerminated.Wait();
         }
     }
 }

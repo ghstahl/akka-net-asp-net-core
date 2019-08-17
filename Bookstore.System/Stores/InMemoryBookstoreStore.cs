@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Bookstore.Stores
 {
-    class InMemoryBookstoreStore : IBookstoreStore
+    public class InMemoryBookstoreStore : IBookstoreStore
     {
         private readonly Dictionary<Guid, Book> _books = new Dictionary<Guid, Book>();
         public Task CreateBookAsync(Book newBook)

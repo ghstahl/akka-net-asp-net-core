@@ -1,20 +1,30 @@
 ﻿using Akka.Actor;
 using Akka.DI.Core;
-using Bookstore.Contracts;
-using Bookstore.Stores;
 using Microsoft.Extensions.DependencyInjection;
-using SimpleInjector;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Bookstore.Extensions
 {
-    public static class SimpleInjectorExtensions
+    public interface IActorFactory
     {
-        public static void AddInMemoryBookstoreStore(this Container container)
+        IActorRef CreateActor<T>(string name) where T : UntypedActor;
+    }
+    public class MyActorFactory : IActorFactory
+    {
+        private ActorSystem _system;
+        private IDependencyResolver _dependencyResolver;
+
+        public MyActorFactory(ActorSystem system, IDependencyResolver dependencyResolver)
         {
-            container.Register<IBookstoreStore, InMemoryBookstoreStore>();
+            _system = system;
+            _dependencyResolver = dependencyResolver;
+        }
+        public IActorRef CreateActor<T>(string name) where T : UntypedActor
+        {
+            var actor = _system.ActorOf(_dependencyResolver.Create<T>(), name);
+            return actor;
         }
     }
     public static class ActorProviderExtensions
