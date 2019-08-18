@@ -12,15 +12,16 @@ namespace Bookstore.Domain
     {
        
         private IBookstoreStore _bookstoreStore;
-
+        private Guid LatestGuid { get; set; }
         public BooksManagerActor(IBookstoreStore bookstoreStore)
         {
             _bookstoreStore = bookstoreStore;
             ReceiveAsync<CreateBook>(async command =>
             {
+                LatestGuid = Guid.NewGuid();
                 var newBook = new Book
                 {
-                    Id = Guid.NewGuid(),
+                    Id = LatestGuid,
                     Title = command.Title,
                     Author = command.Author,
                     Cost = command.Cost,
@@ -30,15 +31,18 @@ namespace Bookstore.Domain
                 await _bookstoreStore.CreateBookAsync(newBook);
             });
 
+            
+            ReceiveAsync<GetLatestGuid>(async _ =>  
+            {
+                 Sender.Tell(LatestGuid);
+            });
+
             ReceiveAsync<GetBookById>(async query =>  
             {
                 var bookDto = await _bookstoreStore.GetBookAsync(query.Id);
-
-                if (bookDto != null)
-                    Sender.Tell(bookDto);
-                else
-                    Sender.Tell(BookNotFound.Instance);
+                Sender.Tell(bookDto);
             });
+
             ReceiveAsync<GetBooks>(async query => {
                 var books = await _bookstoreStore.GetBooksAsync();
                 Sender.Tell(books);

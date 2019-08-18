@@ -11,7 +11,7 @@ namespace Bookstore.Messages
 
         public Guid Id { get; }
     }
-
+    public class GetLatestGuid { }
     public class BookNotFound
     {
         private BookNotFound() { }

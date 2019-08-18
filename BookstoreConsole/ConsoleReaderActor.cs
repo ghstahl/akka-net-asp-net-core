@@ -30,39 +30,52 @@ namespace BookstoreConsole
 
             ReceiveAsync<object>(async _ =>
             {
+                _consoleWriterActor.Tell(new Messages.ConsoleWriterMessages.PrintInstructions());
                 var read = Console.ReadLine();
-                if (
-                  !string.IsNullOrEmpty(read)
-               && String.Equals(read, ExitCommand, StringComparison.OrdinalIgnoreCase))
+                
+                switch (read)
                 {
-                    // shut down the system (acquire handle to system via
-                    // this actors context)
-                    Context.System.Terminate();
-                    return;
+                    case "1":
+                        CreateBook createBook = new CreateBook("Domain-driven design", "Eric J. Evans", 500, 20);
+                        _booksManagerActor.Tell(createBook);
+                        break;
+                    case "2":
+                        var books = await _booksManagerActor.Ask<IEnumerable<BookDto>>(GetBooks.Instance);
+
+                        string json = JsonConvert.SerializeObject(books, Formatting.Indented);
+                        _consoleWriterActor.Tell(new Messages.ConsoleWriterMessages.PrintMessage { Message = json });
+                        break;
+                    case "3":
+                        BookDto bookDto = null;
+                        var latestGuid = await _booksManagerActor.Ask<Guid>(new GetLatestGuid());
+                        if(latestGuid != null)
+                        {
+                            bookDto = await _booksManagerActor.Ask<BookDto>(new GetBookById(latestGuid));
+                        }
+                        if (bookDto == null)
+                        {
+                            _consoleWriterActor.Tell(new Messages.ConsoleWriterMessages.PrintMessage { Message = "Not found" });
+                        }
+                        else
+                        {
+                            string jsonBookDto = JsonConvert.SerializeObject(bookDto, Formatting.Indented);
+                            _consoleWriterActor.Tell(new Messages.ConsoleWriterMessages.PrintMessage { Message = jsonBookDto });
+
+                        }
+
+                        break;
+                    default:
+                        if ( !string.IsNullOrEmpty(read) && 
+                        String.Equals(read, ExitCommand, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // shut down the system (acquire handle to system via
+                            // this actors context)
+                            Context.System.Terminate();
+                            return;
+                        }
+                        break;
                 }
-                if (String.Equals(read, CreateCommand, StringComparison.OrdinalIgnoreCase))
-                {
-                    CreateBook createBook = new CreateBook("Domain-driven design", "Eric J. Evans", 500, 20);
-                    _booksManagerActor.Tell(createBook);
-                }
-                if (String.Equals(read, GetAllCommand, StringComparison.OrdinalIgnoreCase))
-                {
-                    var books = await _booksManagerActor.Ask<IEnumerable<BookDto>>(GetBooks.Instance);
-           
-                    string json = JsonConvert.SerializeObject(books, Formatting.Indented);
-                    _consoleWriterActor.Tell(json);
-
-
-
-
-                }
-                if (String.Equals(read, GetCommand, StringComparison.OrdinalIgnoreCase))
-                {
-                     
-
-
-
-                }
+ 
                 Self.Tell("continue");
             });
 
