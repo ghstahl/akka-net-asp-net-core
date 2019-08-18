@@ -1,5 +1,6 @@
 ﻿using Akka.Actor;
 using Bookstore.Extensions;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace BookstoreConsole
@@ -18,8 +19,11 @@ namespace BookstoreConsole
 
     public class ConsoleWriterActor : ReceiveActor
     {
-        public ConsoleWriterActor(IActorFactory actorFactory)
+        private ILogger<ConsoleWriterActor> _logger;
+
+        public ConsoleWriterActor(ILogger<ConsoleWriterActor> logger,IActorFactory actorFactory)
         {
+            _logger = logger;
             ReceiveAsync<Messages.ConsoleWriterMessages.PrintInstructions>(async _ => {
                 DoPrintInstructions();
             });
@@ -39,6 +43,7 @@ namespace BookstoreConsole
             Console.WriteLine(" ");
 
             Console.WriteLine("Type 'exit' to quit this application at any time.\n");
+            _logger.LogError("test");
         }
     }
 }
