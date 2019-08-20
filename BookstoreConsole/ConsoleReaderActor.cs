@@ -26,9 +26,9 @@ namespace BookstoreConsole
         public ConsoleReaderActor(IActorFactory actorFactory)
         {
             _actorFactory = actorFactory;
-            _booksManagerActor = _actorFactory.CreateActor<BooksManagerActor>("BooksManagerActor");
-            _consoleWriterActor = _actorFactory.CreateActor<ConsoleWriterActor>("ConsoleWriterActor");
-            _badActorActor = Context.ActorOf<BadActor>("BadActor");
+            _booksManagerActor = _actorFactory.CreateActor<BooksManagerActor>();
+            _consoleWriterActor = _actorFactory.CreateActor<ConsoleWriterActor>();
+            _badActorActor = Context.ActorOf<BadActor>();
   
             ReceiveAsync<object>(async _ =>
             {
