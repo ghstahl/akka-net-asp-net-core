@@ -3,13 +3,14 @@ using Akka.DI.Core;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Bookstore.Extensions
 {
     public interface IActorFactory
     {
-        IActorRef CreateActor<T>() where T : UntypedActor;
+        IActorRef CreateActor<T>(string name = null) where T : ActorBase;
     }
     public class MyActorFactory : IActorFactory
     {
@@ -32,16 +33,21 @@ namespace Bookstore.Extensions
             _system = system;
             _dependencyResolver = dependencyResolver;
         }
-        public IActorRef CreateActor<T>() where T : UntypedActor
+        public IActorRef CreateActor<TActor>(Expression<Func<TActor>> factory,string name = null) where TActor : ActorBase
         {
-            if (ActorMap.ContainsKey(typeof(T)))
+            return _system.ActorOf(Props.Create(factory), name);
+        }
+
+        public IActorRef CreateActor<TActor>(string name = null) where TActor : ActorBase
+    {
+            if (ActorMap.ContainsKey(typeof(ActorBase)))
             {
-                return ActorMap[typeof(T)];
+                return ActorMap[typeof(ActorBase)];
             }
             else
             {
-                var actor = _system.ActorOf(_dependencyResolver.Create<T>());
-                ActorMap[typeof(T)] = actor;
+                var actor = _system.ActorOf(_dependencyResolver.Create<TActor>(),name);
+                ActorMap[typeof(ActorBase)] = actor;
                 return actor;
             }
         }

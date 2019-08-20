@@ -1,7 +1,9 @@
-﻿using System.IO;
-using Akka.Configuration;
+﻿using Akka.Configuration;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
-namespace Bookstore
+namespace Bookstore.Utils
 {
     public class ConfigurationLoader
     {

@@ -1,0 +1,25 @@
+{
+  "Serilog": {
+    "Using": [ "Serilog.Sinks.Console" ],
+    "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ],
+    "WriteTo": [
+      { "Name": "Console" },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "log.txt",
+          "rollingInterval": "Day",
+          "outputTemplate": "{Timestamp:HH:mm:ss.fff} {Level:u3} {SourceContext} :> {Message}{NewLine}{Exception}",
+          "shared": true,
+          "flushToDiskInterval": "00:00:03",
+          "retainedFileCountLimit": 31
+        }
+      }
+    ]
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning"
+    }
+  }
+}

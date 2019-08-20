@@ -3,6 +3,7 @@ using Akka.DI.Core;
 using Akka.DI.SimpleInjector;
 using Bookstore.Domain;
 using Bookstore.Extensions;
+using Bookstore.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;

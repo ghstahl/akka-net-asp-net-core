@@ -1,18 +1,15 @@
 ﻿using Akka.Actor;
-using Bookstore;
-using Bookstore.Domain;
-using Microsoft.Extensions.DependencyInjection;
-using SimpleInjector;
-using Akka.DI.SimpleInjector;
 using Akka.DI.Core;
+using Akka.DI.SimpleInjector;
 using Bookstore.Extensions;
-using Bookstore.Contracts;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Serilog;
 using Bookstore.Utils;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using SimpleInjector;
 
-namespace BookstoreConsole
+namespace ChatClient
 {
     class Program
     {
@@ -40,7 +37,7 @@ namespace BookstoreConsole
 
             services.AddSingleton<ActorSystem>(sp =>
             {
-                var system = ActorSystem.Create("bookstore", ConfigurationLoader.Load());
+                var system = ActorSystem.Create("ChatClient", ConfigurationLoader.Load());
                 return system;
             });
 
@@ -51,8 +48,6 @@ namespace BookstoreConsole
                 return resolver;
             });
             services.AddSingleton<IActorFactory, MyActorFactory>();
-
-            Container.AddInMemoryBookstoreStore();
 
 
             Container.Register<ILoggerFactory>(() =>
@@ -75,13 +70,10 @@ namespace BookstoreConsole
             Container.Register(typeof(ILogger<>), typeof(LoggingAdapter<>));
 
 
-            //       services.AddActorProvider<BooksManagerActor>("BooksManagerActor");
-            //       services.AddActorProvider<ConsoleReaderActor>("ConsoleReaderActor");
 
             // IMPORTANT! Register our application entry point
             services.AddTransient<ConsoleApplication>();
             return services;
         }
-
     }
 }

@@ -98,9 +98,9 @@ namespace BookstoreConsole
             _badActorActor = Context.ActorOf<BadActor>();
 
             Context.System.Scheduler.ScheduleTellRepeatedly(
-                TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(5),
-                _badActorActor,
+                TimeSpan.FromSeconds(5), 
+                TimeSpan.FromSeconds(5), 
+                _badActorActor, 
                 new Messages.BadActorMessage.DoThrownInsanelyBadException(),
                 ActorRefs.Nobody);
         }
