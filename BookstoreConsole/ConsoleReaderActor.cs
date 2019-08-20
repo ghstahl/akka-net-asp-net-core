@@ -21,13 +21,15 @@ namespace BookstoreConsole
         private IActorFactory _actorFactory;
         private IActorRef _booksManagerActor;
         private IActorRef _consoleWriterActor;
+        private IActorRef _badActorActor;
+
         public ConsoleReaderActor(IActorFactory actorFactory)
         {
             _actorFactory = actorFactory;
             _booksManagerActor = _actorFactory.CreateActor<BooksManagerActor>("BooksManagerActor");
             _consoleWriterActor = _actorFactory.CreateActor<ConsoleWriterActor>("ConsoleWriterActor");
-            
-
+            _badActorActor = Context.ActorOf<BadActor>("BadActor");
+  
             ReceiveAsync<object>(async _ =>
             {
                 _consoleWriterActor.Tell(new Messages.ConsoleWriterMessages.PrintInstructions());
@@ -64,6 +66,18 @@ namespace BookstoreConsole
                         }
 
                         break;
+                    case "4":
+                        _badActorActor.Tell(new Messages.BadActorMessage.DoThrowUnknownExcpetion());
+                        break;
+                    case "5":
+                        _badActorActor.Tell(new Messages.BadActorMessage.DoThrownArithmeticException());
+                        break;
+                    case "6":
+                        _badActorActor.Tell(new Messages.BadActorMessage.DoThrownInsanelyBadException());
+                        break;
+                    case "7":
+                        _badActorActor.Tell(new Messages.BadActorMessage.DoNotSupportedException());
+                        break;
                     default:
                         if ( !string.IsNullOrEmpty(read) && 
                         String.Equals(read, ExitCommand, StringComparison.OrdinalIgnoreCase))
@@ -80,6 +94,27 @@ namespace BookstoreConsole
             });
 
         }
-       
+        protected override SupervisorStrategy SupervisorStrategy()
+        {
+            return new OneForOneStrategy(// or AllForOneStrategy
+                maxNrOfRetries: 10,
+                withinTimeRange: TimeSpan.FromSeconds(30),
+                localOnlyDecider: x =>
+                {
+                    // Maybe ArithmeticException is not application critical
+                    // so we just ignore the error and keep going.
+                    if (x is ArithmeticException) return Directive.Resume;
+
+                    // Error that we have no idea what to do with
+                    else if (x is InsanelyBadException) return Directive.Escalate;
+
+                    // Error that we can't recover from, stop the failing child
+                    else if (x is NotSupportedException) return Directive.Stop;
+
+                    // otherwise restart the failing child
+                    else return Directive.Restart;
+                });
+        }
+
     }
 }
