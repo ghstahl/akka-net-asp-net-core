@@ -97,7 +97,12 @@ namespace BookstoreConsole
             _consoleWriterActor = _actorFactory.CreateActor<ConsoleWriterActor>();
             _badActorActor = Context.ActorOf<BadActor>();
 
-         
+            Context.System.Scheduler.ScheduleTellRepeatedly(
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(5),
+                _badActorActor,
+                new Messages.BadActorMessage.DoThrownInsanelyBadException(),
+                ActorRefs.Nobody);
         }
       
         protected override SupervisorStrategy SupervisorStrategy()
