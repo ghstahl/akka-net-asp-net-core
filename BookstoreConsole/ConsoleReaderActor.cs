@@ -26,15 +26,11 @@ namespace BookstoreConsole
         public ConsoleReaderActor(IActorFactory actorFactory)
         {
             _actorFactory = actorFactory;
-            _booksManagerActor = _actorFactory.CreateActor<BooksManagerActor>();
-            _consoleWriterActor = _actorFactory.CreateActor<ConsoleWriterActor>();
-            _badActorActor = Context.ActorOf<BadActor>();
-  
             ReceiveAsync<object>(async _ =>
             {
                 _consoleWriterActor.Tell(new Messages.ConsoleWriterMessages.PrintInstructions());
                 var read = Console.ReadLine();
-                
+
                 switch (read)
                 {
                     case "1":
@@ -50,7 +46,7 @@ namespace BookstoreConsole
                     case "3":
                         BookDto bookDto = null;
                         var latestGuid = await _booksManagerActor.Ask<Guid>(new GetLatestGuid());
-                        if(latestGuid != null)
+                        if (latestGuid != null)
                         {
                             bookDto = await _booksManagerActor.Ask<BookDto>(new GetBookById(latestGuid));
                         }
@@ -79,7 +75,7 @@ namespace BookstoreConsole
                         _badActorActor.Tell(new Messages.BadActorMessage.DoNotSupportedException());
                         break;
                     default:
-                        if ( !string.IsNullOrEmpty(read) && 
+                        if (!string.IsNullOrEmpty(read) &&
                         String.Equals(read, ExitCommand, StringComparison.OrdinalIgnoreCase))
                         {
                             // shut down the system (acquire handle to system via
@@ -89,11 +85,21 @@ namespace BookstoreConsole
                         }
                         break;
                 }
- 
+
                 Self.Tell("continue");
             });
-
         }
+       
+        protected override void PreStart()
+        {
+            base.PreStart();
+            _booksManagerActor = _actorFactory.CreateActor<BooksManagerActor>();
+            _consoleWriterActor = _actorFactory.CreateActor<ConsoleWriterActor>();
+            _badActorActor = Context.ActorOf<BadActor>();
+
+         
+        }
+      
         protected override SupervisorStrategy SupervisorStrategy()
         {
             return new OneForOneStrategy(// or AllForOneStrategy
