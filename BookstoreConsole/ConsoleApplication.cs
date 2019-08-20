@@ -16,7 +16,7 @@ namespace BookstoreConsole
         {
             _system = system;
             _actorFactory = actorFactory;
-            _consoleReaderActor = _actorFactory.CreateActor<ConsoleReaderActor>("ConsoleReaderActor");
+            _consoleReaderActor = _actorFactory.CreateActor<ConsoleReaderActor>();
         }
 
         // Application starting point
